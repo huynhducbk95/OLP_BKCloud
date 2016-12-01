@@ -13,11 +13,11 @@
 from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
+import django
 from horizon import forms
 from horizon import tables
 from openstack_dashboard.dashboards.container.auto_scaling import forms as add_rule_forms
 from openstack_dashboard.dashboards.container.auto_scaling import tables as rule_tables
-
 
 class Rule:
     def __init__(self, rule_id, metric, upper_threshold, lower_threshold, node_up, node_down):
@@ -61,3 +61,4 @@ class AddRuleView(forms.ModalFormView):
     def get_initial(self):
         initial = {}
         return initial
+
