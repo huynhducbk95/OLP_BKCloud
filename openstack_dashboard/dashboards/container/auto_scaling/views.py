@@ -43,6 +43,11 @@ class IndexView(tables.DataTableView):
         rules.append(Rule(5, 'CPU', 90, 20, 1, 4))
         return rules
 
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        context['VM'] = ['swarm-olp','cal-olp','test','demo']
+        return context
+
 class AddRuleView(forms.ModalFormView):
     form_class = add_rule_forms.AddRuleForm
     form_id = "add_rule_form"
