@@ -12,13 +12,23 @@
           class="ng-pristine ng-valid ng-scope form-horizontal" action="/container/" method="POST">
         {% csrf_token %}
         <div class="form-group">
-            <div class="col-md-4" class="form-group">
-                <label for="meter" class="control-label col-md-2">VM</label>
+            <div class="col-md-3" class="form-group">
+                <label class="control-label col-md-2">VM</label>
                 <div class="col-md-10">
                     <select class="form-control" name="VM">
                         {% for vm in VM %}
                             <option value="{{ vm }}">{{ vm }}</option>
                         {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-3" class="form-group">
+                <label class="control-label col-md-2">Type</label>
+                <div class="col-md-10">
+                    <select class="form-control" name="type">
+                        <option>CPU</option>
+                        <option>Memory</option>
                     </select>
                 </div>
             </div>
