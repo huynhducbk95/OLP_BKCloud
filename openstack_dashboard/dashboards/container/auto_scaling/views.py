@@ -128,14 +128,18 @@ class GetInstanceList(django.views.generic.TemplateView):
 class GetVMDetail(django.views.generic.TemplateView):
     def get(self):
         instance_id = self.request.GET.get('instance_id', None)
-        result = {}
         try:
             instance = api.nova.server_get(self.request, instance_id)
             instance_ip = instance.addresses['OPS1_IntNet'][0]['addr']
             full_flavor = api.nova.flavor_get(
                 self.request, instance.flavor["id"])
+            result = {
+                'instance_ip' : instance_ip,
+                'instance_flavor' :full_flavor,
+                'instance_data': self.get_cpu_ram_usage()
+            }
         except Exception:
-            instance = None
+            result = {}
             print ('unable to retreive instance detail')
         return HttpResponse(json.dumps(result), content_type='application/json')
 
