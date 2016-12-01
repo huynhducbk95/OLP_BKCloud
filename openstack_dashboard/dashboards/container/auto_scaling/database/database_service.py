@@ -36,3 +36,17 @@ Base.metadata.create_all(engine)
 def get_rule_list():
     rule_list = db_session.query(Rule).all()
     return rule_list
+
+def updateRule(rule):
+    rule_now  = db_session.query(Rule).filter(Rule.metric==rule.metric).first()
+    if rule_now == None :
+        db_session.add(rule)
+        db_session.commit()
+    else:
+        rule_now.metric = rule.metric
+        rule_now.upper_threshold = rule.upper_threshold
+        rule_now.lower_threshold = rule.lower_threshold
+        rule_now.node_up = rule.node_up
+        rule_now.node_down = rule.node_down
+        db_session.commit()
+

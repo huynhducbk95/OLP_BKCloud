@@ -20,6 +20,7 @@ from horizon import forms
 from horizon import tables
 from openstack_dashboard.dashboards.container.auto_scaling import forms as add_rule_forms
 from openstack_dashboard.dashboards.container.auto_scaling import tables as rule_tables
+from openstack_dashboard.dashboards.container.auto_scaling.database import database_service
 import docker
 import requests
 import datetime
@@ -42,50 +43,22 @@ class IndexView(tables.DataTableView):
 
     def get_data(self):
         rules = []
-        rules.append(Rule(1, 'CPU', 90, 20, 1, 4))
-        rules.append(Rule(2, 'CPU', 90, 20, 1, 4))
-        rules.append(Rule(3, 'CPU', 90, 20, 1, 4))
-        rules.append(Rule(4, 'CPU', 90, 20, 1, 4))
-        rules.append(Rule(5, 'CPU', 90, 20, 1, 4))
-        ip = 'localhost'
-        port = '8080'
-        url = 'http://' + ip + ":" + port + '/api/v1.2/docker/'
-        data = requests.get(url=url)
-        containers = data.json()
-        list_key = containers.keys()
-        result= {}
-        container_list = []
-        for container in list_key:
-            container_info = {}
-            container_id = containers[container]['id']
-            container_name = containers[container]['aliases'][0]
-            stats = containers[container]['stats']
-            series = []
-            index = 1
-            while index< len(stats):
-                cur = stats[index]
-                prev = stats[index - 1]
-                interval_nano = get_interval(
-                    cur['timestamp'], prev['timestamp'])
-                cpu_usage = (cur['cpu']['usage']['total'] -
-                             prev['cpu']['usage']['total']) / interval_nano
-                container_usage = {
-                    'time': cur['timestamp'][:19],
-                    'cpu':cpu_usage,
-                }
-                series.append(container_usage)
-                index += 1
-            container_info['container_id'] = container_id
-            container_info['container_name'] =container_name
-            container_info['container_data'] = series
-            container_list.append(container_info)
-        result['container_list'] = container_list
+        for rule in database_service.db_session.\
+                query(database_service.Rule):
+            rules.append(
+                Rule(rule.id,
+                     rule.metric,
+                     rule.upper_threshold,
+                     rule.lower_threshold,
+                     rule.node_up,
+                     rule.node_down))
         return rules
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        context['VM'] = ['swarm-olp','cal-olp','test','demo']
+        context['VM'] = ['swarm-olp', 'cal-olp', 'test', 'demo']
         return context
+
 
 class AddRuleView(forms.ModalFormView):
     form_class = add_rule_forms.AddRuleForm
@@ -130,12 +103,13 @@ class GetVMDetail(django.views.generic.TemplateView):
         instance_id = self.request.GET.get('instance_id', None)
         try:
             instance = api.nova.server_get(self.request, instance_id)
+
             instance_ip = instance.addresses['OPS1_IntNet'][0]['addr']
             full_flavor = api.nova.flavor_get(
                 self.request, instance.flavor["id"])
             result = {
-                'instance_ip' : instance_ip,
-                'instance_flavor' :full_flavor,
+                'instance_ip': instance_ip,
+                'instance_flavor': full_flavor,
                 'instance_data': self.get_cpu_ram_usage()
             }
         except Exception:

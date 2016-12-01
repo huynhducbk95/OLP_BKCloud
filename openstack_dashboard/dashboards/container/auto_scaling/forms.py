@@ -1,5 +1,6 @@
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
+from openstack_dashboard.dashboards.container.auto_scaling.database import database_service
 
 from horizon import forms
 
@@ -26,6 +27,17 @@ class AddRuleForm(forms.SelfHandlingForm):
         super(AddRuleForm, self).__init__(request, *args, **kwargs)
 
     def handle(self, request, data):
+        metric = data['metric']
+        upper_threshold = data['upper_threshold']
+        lower_threshold = data['lower_threshold']
+        node_up = data['node_up']
+        node_down = data['node_down']
+        rule = database_service.Rule(metric = metric,
+                                     upper_threshold = upper_threshold,
+                                     lower_threshold = lower_threshold,
+                                     node_up = node_up,
+                                     node_down = node_down)
+        database_service.updateRule(rule)
         return True
 
     def get_success_url(self):
