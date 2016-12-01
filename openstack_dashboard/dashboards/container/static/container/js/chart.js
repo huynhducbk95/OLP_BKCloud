@@ -74,7 +74,6 @@ function LineChart(selector) {
     this.get_vm_data_list = function () {
         var self = this;
         container_url_list = $(this.chart_selector).attr('data-vm-detail-url');
-        console.log(container_url_list);
         return $.getJSON(container_url_list);
     };
 
@@ -82,6 +81,8 @@ function LineChart(selector) {
         var self = this;
         $.when(this.get_vm_data_list())
             .done(function (vm_data) {
+                console.log('data');
+                console.log(vm_data);
                 // containers_data = self.process_received_containers_data(arguments);
                 var cpu_data = self.process_received_data(vm_data.cpu_data);
                 cpu_data.name = "CPU";
@@ -94,7 +95,7 @@ function LineChart(selector) {
                 ram_data.legend_index = 1;
 
                 var vm_line_data = [cpu_data, ram_data];
-                console.log(vm_line_data);
+                // console.log(vm_line_data);
 
                 self.scale_domain_range(vm_line_data);
 
@@ -150,9 +151,9 @@ function LineChart(selector) {
 
                 //add chart to chart group and set timer for this chart
                 chart_group.charts.push(self);
-                self.timer = setInterval(function () {
-                    self.update_charts();
-                }, 1000)
+                // self.timer = setInterval(function () {
+                //     self.update_charts();
+                // }, 1000);
             })
             .fail(function (jqXHR, error, errorThrown) {
                 horizon.alert('error', gettext('Can not receive container data !. Reason : ' +
