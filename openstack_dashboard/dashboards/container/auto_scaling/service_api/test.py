@@ -1,10 +1,13 @@
-import django
+# import django
 from openstack_dashboard import api
+import logging
 
-class GetInstanceList(django.views.generic.TemplateView):
-    def get(self, request, *args, **kwargs):
+LOG = logging.getLogger(__name__)
+def get(self):
         try:
-            instances, self._more = api.nova.server_list(
+            instances = api.nova.server_list(
                 self.request)
         except Exception:
             print ('error')
+
+get()
