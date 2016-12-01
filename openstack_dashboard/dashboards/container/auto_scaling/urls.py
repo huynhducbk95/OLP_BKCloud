@@ -19,4 +19,5 @@ from openstack_dashboard.dashboards.container.auto_scaling.chart \
 urlpatterns = [
     url(r'^$', views.IndexView.as_view(), name='index'),
     url(r'chart/', include(chart_urls, namespace='chart')),
+    url(r'^add_rule', views.AddRuleView.as_view(), name='add_rule'),
 ]
