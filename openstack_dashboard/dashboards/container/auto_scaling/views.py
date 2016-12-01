@@ -18,7 +18,7 @@ from openstack_dashboard.dashboards.container.auto_scaling import tables as rule
 
 class Rule:
     def __init__(self, rule_id, metric, upper_threshold, lower_threshold, node_up, node_down):
-        self.rule_id = rule_id
+        self.id = rule_id
         self.metric = metric
         self.upper_threshold = upper_threshold
         self.lower_threshold = lower_threshold
@@ -33,4 +33,9 @@ class IndexView(tables.DataTableView):
 
     def get_data(self):
         rules = []
+        rules.append(Rule(1, 'CPU', 90, 20, 1, 4))
+        rules.append(Rule(1, 'CPU', 90, 20, 1, 4))
+        rules.append(Rule(1, 'CPU', 90, 20, 1, 4))
+        rules.append(Rule(1, 'CPU', 90, 20, 1, 4))
+        rules.append(Rule(1, 'CPU', 90, 20, 1, 4))
         return rules
