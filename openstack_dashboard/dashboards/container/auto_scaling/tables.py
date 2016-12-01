@@ -1,10 +1,39 @@
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ungettext_lazy
 
 from horizon import tables
 
 
-class ContainerFilter(tables.FilterAction):
-    name = 'container_filter'
+class DeleteRule(tables.DeleteAction):
+    @staticmethod
+    def action_present(count):
+        return ungettext_lazy(
+            u"Delete rule",
+            u"Delete rules",
+            count
+        )
+
+    @staticmethod
+    def action_past(count):
+        return ungettext_lazy(
+            u"Deleted rule",
+            u"Deleted rules",
+            count
+        )
+
+    def delete(self, request, rule_id):
+        pass
+
+
+class AddRule(tables.LinkAction):
+    name = "add_rule"
+    verbose_name = _("Add rule")
+    url = "horizon:container:auto_scaling:add_rule"
+    classes = ("ajax-modal",)
+    icon = "plus"
+
+    def allowed(self, request, datum=None):
+        return True
 
 
 class ScalingRuleTable(tables.DataTable):
@@ -20,6 +49,4 @@ class ScalingRuleTable(tables.DataTable):
     class Meta(object):
         verbose_name = "Scaling Rule"
         name = 'scaling_rule'
-        # row_actions = ()
-
-
+        table_actions = (AddRule, DeleteRule,)
