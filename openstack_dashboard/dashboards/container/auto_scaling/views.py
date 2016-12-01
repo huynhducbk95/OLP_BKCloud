@@ -10,9 +10,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
+from horizon import forms
 from horizon import tables
+from openstack_dashboard.dashboards.container.auto_scaling import forms as add_rule_forms
 from openstack_dashboard.dashboards.container.auto_scaling import tables as rule_tables
 
 
@@ -34,8 +37,22 @@ class IndexView(tables.DataTableView):
     def get_data(self):
         rules = []
         rules.append(Rule(1, 'CPU', 90, 20, 1, 4))
-        rules.append(Rule(1, 'CPU', 90, 20, 1, 4))
-        rules.append(Rule(1, 'CPU', 90, 20, 1, 4))
-        rules.append(Rule(1, 'CPU', 90, 20, 1, 4))
-        rules.append(Rule(1, 'CPU', 90, 20, 1, 4))
+        rules.append(Rule(2, 'CPU', 90, 20, 1, 4))
+        rules.append(Rule(3, 'CPU', 90, 20, 1, 4))
+        rules.append(Rule(4, 'CPU', 90, 20, 1, 4))
+        rules.append(Rule(5, 'CPU', 90, 20, 1, 4))
         return rules
+
+class AddRuleView(forms.ModalFormView):
+    form_class = add_rule_forms.AddRuleForm
+    form_id = "add_rule_form"
+    modal_header = _("Add Rule Host")
+    submit_label = _("Add Rule Host")
+    submit_url = reverse_lazy('horizon:container:auto_scaling:add_rule')
+    template_name = 'container/auto_scaling/add_rule.html'
+    success_url = reverse_lazy('horizon:container:auto_scaling:index')
+    page_title = _("Add Rule Host")
+
+    def get_initial(self):
+        initial = {}
+        return initial
