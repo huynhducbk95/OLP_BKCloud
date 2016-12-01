@@ -18,7 +18,7 @@ from openstack_dashboard.dashboards.container.auto_scaling\
 urlpatterns = [
     # url(r'^container_cpu_detail$', views.ContainerCPUDetailView.as_view(),
     #     name='container_cpu_detail'),
-    url(r'^vm_detail$', views.VMDetailView.as_view(),
+    url(r'^vm_detail$', views.GetVMDetail.as_view(),
         name='vm_detail'),
     # url(r'^container_list$', views.ContainerListView.as_view(),
     #     name='container_list'),
