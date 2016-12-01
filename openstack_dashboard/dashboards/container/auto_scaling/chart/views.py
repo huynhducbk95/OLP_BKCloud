@@ -18,6 +18,8 @@ import datetime
 from openstack_dashboard.dashboards.container.auto_scaling\
     .chart import cadvisor_api
 from openstack_dashboard import api
+import requests
+
 
 HOST_IP = '127.0.0.1'
 
@@ -73,19 +75,21 @@ class GetVMDetail(django.views.generic.TemplateView):
 
     def get_cpu_ram_usage(self, ip, port, flavor):
         ip = 'localhost'
-        port = '8080'
+        # port = '8080'
         url = 'http://' + ip + ":" + port + '/api/v1.2/docker/'
         data = requests.get(url=url)
         containers = data.json()
         list_key = containers.keys()
-        result = {}
+        vm_data = {}
         container_list = []
         for container in list_key:
+            container_id = containers[container]['aliases'][1]
             container_info = {}
-            container_id = containers[container]['id']
-            container_name = containers[container]['aliases'][0]
+            cpu_data = {}
+            ram_data = {}
             stats = containers[container]['stats']
-            series = []
+            cpu_value = []
+            ram_value = []
             index = 1
             while index < len(stats):
                 cur = stats[index]
@@ -94,78 +98,62 @@ class GetVMDetail(django.views.generic.TemplateView):
                     cur['timestamp'], prev['timestamp'])
                 cpu_usage = (cur['cpu']['usage']['total'] -
                              prev['cpu']['usage']['total']) / interval_nano
-                container_usage = {
-                    'time': cur['timestamp'][:19],
-                    'cpu': cpu_usage,
+                ram_usage = cur['memory']['usage']/(1024*1024)
+                cpu = {
+                    'x': cur['timestamp'][:19],
+                    'y': cpu_usage,
                 }
-                series.append(container_usage)
+                ram = {
+                    'x': cur['timestamp'][:19],
+                    'y':ram_usage,
+                }
+                cpu_value.append(cpu)
+                ram_value.append(ram)
                 index += 1
-            container_info['container_id'] = container_id
-            container_info['container_name'] = container_name
-            container_info['container_data'] = series
+            cpu_data['value'] = cpu_value
+            ram_data['value'] = cpu_value
+            container_info['cpu_data'] = cpu_data
+            container_info['ram_data'] = ram_data
             container_list.append(container_info)
-        result['container_list'] = container_list
-        return result
+        cpu_total = []
+        ram_total = []
+        container0 = container_list[0]['cpu_data']['value']
+        for data in container0:
+            cpu_unit = {
+                'x': data['x'],
+                'y':(data['y']/flavor.vcpus)*100
+            }
+            cpu_total.append(cpu_unit)
+        container1 = container_list[0]['ram_data']['value']
+        for data1 in container1:
+            ram_unit = {
+                'x': data1['x'],
+                'y': (data1['y']/flavor.ram)*100
+            }
+            ram_total.append(ram_unit)
+        vm_data = {
+            'cpu_data': cpu_data,
+            'ram_data': ram_data,
+        }
+        # vm_data['vm_data'] = container_list
+        return vm_data
 
     def get(self, request, *args, **kwargs):
         instance_id = self.request.GET.get('instance_id', None)
-        result = {}
         try:
             instance = api.nova.server_get(self.request, instance_id)
             instance_ip = instance.addresses.values()[0][0]['addr']
             full_flavor = api.nova.flavor_get(
                 self.request, instance.flavor["id"])
-            # vm_data = self.get_cpu_ram_usage(instance_ip, '8080', full_flavor)
-            container_id = '3014bb409730e961fe4f39f6d1576c' +\
-                '3dc98d3d09d05cd115b9a84b31b9f20931'
-            container_data = cadvisor_api.get_container_detail(
-                host_ip=HOST_IP, container_id=container_id)
-            if container_data != 'Error':
-                container_name = container_data['name']
-                containers_info = container_data['realtime_data']
-                data_timestamp_list = []
-                data = {}
-                data['name'] = container_name
-                data['unit'] = 'Cores'
-                index = 1
-                data_list = containers_info['/docker/' + container_id]
-                while index < len(data_list):
-                    cur = data_list[index]
-                    prev = data_list[index - 1]
-                    interval_nano = get_interval(
-                        cur['timestamp'], prev['timestamp'])
-                    cpu_usage = (cur['cpu']['usage']['total'] -
-                                 prev['cpu']['usage']['total']) / interval_nano
-                    data_timestamp_list.append(
-                        {'y': cpu_usage * 1000, 'x': cur['timestamp']})
-                    index += 1
-                data['value'] = data_timestamp_list
-                data['id'] = container_id
-
-            vm_data = {'cpu_data': {'value': data['value']}}
-
-            container_data = cadvisor_api.get_container_detail(
-                host_ip=HOST_IP, container_id=container_id)
-            if container_data != 'Error':
-                container_name = container_data['name']
-                container_ram_data = container_data['realtime_data']
-                data_timestamp_list = []
-                data = {}
-                data['name'] = container_name
-                data['unit'] = 'MB'
-                for value_unit in container_ram_data['/docker/' +
-                                                     container_id]:
-                    data_timestamp_list.append(
-                        {'y': float(value_unit['memory']['usage']) / (1024 * 1024),
-                         'x': value_unit['timestamp']})
-                data['value'] = data_timestamp_list
-                data['id'] = container_id
-            vm_data['ram_data'] = {'value': data['value']}
-
+            result = {
+                'vm_data': self.get_cpu_ram_usage(instance_ip,'8080',full_flavor)
+            }
         except Exception:
             instance = None
+            result = {
+            }
 
-        return HttpResponse(json.dumps(vm_data),
+        return HttpResponse(json.dumps(result),
                             content_type='application/json')
 
 
