@@ -145,9 +145,8 @@ class GetVMDetail(django.views.generic.TemplateView):
             instance_ip = instance.addresses.values()[0][0]['addr']
             full_flavor = api.nova.flavor_get(
                 self.request, instance.flavor["id"])
-            result = {
-                'vm_data': self.get_cpu_ram_usage(instance_ip,'8080',full_flavor)
-            }
+            result = \
+                self.get_cpu_ram_usage(instance_ip,'8080',full_flavor)
         except Exception:
             instance = None
             result = {
