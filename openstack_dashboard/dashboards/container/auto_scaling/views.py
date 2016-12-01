@@ -82,6 +82,10 @@ class IndexView(tables.DataTableView):
         result['container_list'] = container_list
         return rules
 
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        context['VM'] = ['swarm-olp','cal-olp','test','demo']
+        return context
 
 class AddRuleView(forms.ModalFormView):
     form_class = add_rule_forms.AddRuleForm

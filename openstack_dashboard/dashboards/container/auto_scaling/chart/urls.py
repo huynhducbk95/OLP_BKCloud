@@ -11,15 +11,19 @@
 # under the License.
 
 from django.conf.urls import url
-from django.conf.urls import include
-from openstack_dashboard.dashboards.container.auto_scaling import views
-from openstack_dashboard.dashboards.container.auto_scaling.chart \
-    import urls as chart_urls
+
+from openstack_dashboard.dashboards.container.auto_scaling\
+    .chart import views
 
 urlpatterns = [
-    url(r'^$', views.IndexView.as_view(), name='index'),
-    url(r'chart/', include(chart_urls, namespace='chart')),
-    url(r'^add_rule', views.AddRuleView.as_view(), name='add_rule'),
-    url(r'^instance_list',views.GetInstanceList.as_view(), name='instance_list'),
-    url(r'^instance_detail',views.GetVMDetail.as_view(),name = 'instance_detail'),
+    # url(r'^container_cpu_detail$', views.ContainerCPUDetailView.as_view(),
+    #     name='container_cpu_detail'),
+    url(r'^vm_detail$', views.VMDetailView.as_view(),
+        name='vm_detail'),
+    # url(r'^container_list$', views.ContainerListView.as_view(),
+    #     name='container_list'),
+    # url(r'^service_container_list', views.GetContainerListInService.as_view(),
+    #     name='container_list_in_service'),
+    url(r'^vm_list', views.GetVMList.as_view(), name='vm_list'),
 ]
+
