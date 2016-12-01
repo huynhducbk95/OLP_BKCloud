@@ -25,7 +25,7 @@ class Rule(Base):
 
 
 engine = create_engine(
-    'sqlite:///' + CURRENT_FOLDER_PATH + '/service.sqlite', echo=True)
+    'sqlite:///' + CURRENT_FOLDER_PATH + 'rule.sqlite', echo=True)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
